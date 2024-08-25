@@ -2,8 +2,8 @@ namespace AzAppDevContainer.App.Domain;
 
 public class Customer
 {
-    public int Id { get; private set; }
-    public string FullName { get; private set; }
-    public string Adress { get; private set; }
-    public string Email { get; private set; }
+    public int Id { get; set; }
+    public string FullName { get; set; }
+    public string Address { get; set; }
+    public string Email { get; set; }
 }

@@ -1,51 +1,55 @@
 using AzAppDevContainer.App.Data;
+using AzAppDevContainer.App.Domain;
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
+var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: myAllowSpecificOrigins,
+        policy =>
+        {
+            policy
+                .AllowAnyHeader()
+                .AllowAnyOrigin()
+                .AllowAnyMethod();
+        });
+});
+
 var connectionString = builder.Configuration.GetConnectionString("AzApp");
-builder.Services.AddDbContext<DataContext>(options => 
+builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+using var scope = app.Services.CreateScope();
+var db = scope.ServiceProvider.GetService<DataContext>();
+db.Database.Migrate();
 
-app.UseHttpsRedirection();
+app.UseSwagger();
+app.UseSwaggerUI();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+app.UseCors(myAllowSpecificOrigins);
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+app.MapPost("/customer", async (Customer customer, DataContext context) =>
+    {
+        await context.Customers.AddAsync(customer);
+        await context.SaveChangesAsync();
+        return Results.Created();
+    })
+    .WithName("Create Customer")
+    .WithOpenApi();
+
+app.MapGet("/customer/{id}", async (int id, DataContext context) =>
+    {
+        var customer = await context.Customers.Where(p => p.Id == id).FirstOrDefaultAsync();
+        return customer is null ? Results.NotFound() : Results.Ok(customer);
+    })
+    .WithName("Get Customer")
+    .WithOpenApi();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

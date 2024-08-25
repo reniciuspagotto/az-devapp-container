@@ -12,7 +12,7 @@ public class CustomerDbConfiguration : IEntityTypeConfiguration<Customer>
         builder.HasKey(c => c.Id);
         builder.Property(c => c.Id).ValueGeneratedOnAdd();
         builder.Property(c => c.FullName);
-        builder.Property(c => c.Adress);
+        builder.Property(c => c.Address);
         builder.Property(c => c.Email);
     }
 }

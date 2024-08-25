@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{88B40931-E58C-42C6-854C-CC7409EF1E75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzAppDevContainerTest", "test\AzAppDevContainerTest\AzAppDevContainerTest.csproj", "{FDB29933-2EA0-4F1A-91BE-5FD108AE992C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzAppDevContainer.Test", "test\AzAppDevContainer.Test\AzAppDevContainer.Test.csproj", "{FDB29933-2EA0-4F1A-91BE-5FD108AE992C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{984C3FB9-4793-4605-99A7-DE40A104BD51}"
 EndProject

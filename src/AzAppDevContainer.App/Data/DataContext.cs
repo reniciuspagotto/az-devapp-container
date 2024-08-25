@@ -10,7 +10,7 @@ public class DataContext : DbContext
     { }
 
     public DbSet<Customer> Customers { get; set; }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
