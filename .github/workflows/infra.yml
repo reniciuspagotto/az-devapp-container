@@ -1,0 +1,61 @@
+
+name: "Infrastructure Azure"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  terraform:
+    name: "Terraform"
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./iac
+
+    env:
+      BACKEND_STORAGE_RESOURCE_GROUP: AzDevDaysTfState
+      BACKEND_STORAGE_ACCOUNT_NAME: azdevdaystf
+      BACKEND_STORAGE_CONTAINER_NAME: aztfstate
+      BACKEND_STATE_NAME: azapp.tfstate
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.3.9"
+
+      - name: Login Azure
+        env:
+          AAD_SERVICE_PRINCIPAL_CLIENT_ID: ${{ secrets.AZ_SP_CLIENT_ID }}
+          AAD_SERVICE_PRINCIPAL_CLIENT_SECRET: ${{ secrets.AZ_SP_CLIENT_SECRET }}
+        run: |
+          az login --service-principal -u ${{ secrets.AZ_SP_CLIENT_ID }} -p ${{ secrets.AZ_SP_CLIENT_SECRET }} --tenant ${{ secrets.AZ_TENANT_ID }}
+          az account set -s ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az account show
+
+      - name: Terraform Init
+        run: terraform init -upgrade -input=false -backend-config=key="$BACKEND_STATE_NAME" -backend-config=storage_account_name="$BACKEND_STORAGE_ACCOUNT_NAME" -backend-config=container_name="$BACKEND_STORAGE_CONTAINER_NAME" -backend-config=resource_group_name="$BACKEND_STORAGE_RESOURCE_GROUP" -backend-config=subscription_id="${{ secrets.AZ_SUBSCRIPTION_ID }}" -backend-config=tenant_id="${{ secrets.AZ_TENANT_ID }}" -backend-config=client_id="${{ secrets.AZ_SP_CLIENT_ID }}" -backend-config=client_secret="${{ secrets.AZ_SP_CLIENT_SECRET }}"
+        env:
+          BACKEND_STORAGE_RESOURCE_GROUP: ${{ env.BACKEND_STORAGE_RESOURCE_GROUP }}
+          BACKEND_STORAGE_ACCOUNT_NAME: ${{ env.BACKEND_STORAGE_ACCOUNT_NAME }}
+          BACKEND_STORAGE_CONTAINER_NAME: ${{ env.BACKEND_STORAGE_CONTAINER_NAME }}
+          BACKEND_STATE_NAME: ${{ env.BACKEND_STATE_NAME }}
+
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      - name: Terraform Plan
+        run: terraform plan -input=false -out azdevdays.tfplan
+
+      - uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.APPROVAL_TOKEN }}
+          approvers: reniciuspagotto
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve azdevdays.tfplan
