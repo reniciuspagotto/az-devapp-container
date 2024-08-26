@@ -76,35 +76,12 @@ jobs:
       - name: Grant Trivy Permissions
         run: sudo chown -R $(stat . -c %u:%g) .trivy
 
-  gh-package:
-    name: Publish Artifact | GitHub Registry
-    runs-on: ubuntu-latest
-    needs: [ build, security ]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to the GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.GH_REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GH_REGISTRY_TOKEN }}
-
-      - name: Build and Push Image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-
   az-registry:
     name: Publish Artifact | Azure Container Registry
     runs-on: ubuntu-latest
     needs: [ build, security ]
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -119,12 +96,22 @@ jobs:
           username: ${{ secrets.AZ_SP_CLIENT_ID }}
           password: ${{ secrets.AZ_SP_CLIENT_SECRET }}
 
+      - name: Retrieve Image Version
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha
+
       - name: Build and Push Image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   deploy:
     name: Azure Web App Deployment
@@ -144,4 +131,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          images: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          images: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.az-registry.outputs.version }}
