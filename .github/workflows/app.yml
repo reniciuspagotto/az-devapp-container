@@ -40,14 +40,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
       
-      - name: Trivy vulnerability scanner
+      - name: Trivy Scanner | Repo
         uses: aquasecurity/trivy-action@0.20.0
         with:
           scan-type: 'fs'
           ignore-unfixed: true
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL'
+          format: 'table'
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+
+      - name: Trivy Scanner | Docker Image
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: 'mcr.microsoft.com/dotnet/aspnet:8.0'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'HIGH,CRITICAL'
+          scanners: vuln
 
   gh-package:
     name: Publish Artifact | GitHub Registry

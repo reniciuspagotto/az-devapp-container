@@ -39,7 +39,7 @@ app.MapPost("/customer", async (Customer customer, DataContext context) =>
     {
         await context.Customers.AddAsync(customer);
         await context.SaveChangesAsync();
-        return Results.Created();
+        return Results.Created($"/customer/{customer.Id}", customer);
     })
     .WithName("Create Customer")
     .WithOpenApi();
