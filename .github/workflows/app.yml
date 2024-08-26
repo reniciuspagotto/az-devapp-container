@@ -39,21 +39,26 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Build an image from Dockerfile
+        run: |
+          docker build -t ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
       
       - name: Trivy Scanner | Repo
         uses: aquasecurity/trivy-action@0.20.0
         with:
-          scan-type: 'fs'
+          scan-type: 'rootfs'
+          scan-ref: 'rootfs-example-binary'
           ignore-unfixed: true
           format: 'table'
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
 
-      - name: Trivy Scanner | Docker Image
+      - name: Trivy Scanner | Docker Base Image
         uses: aquasecurity/trivy-action@0.20.0
         with:
-          image-ref: 'eclipse-temurin:17.0.11_9-jre'
+          image-ref: 'mcr.microsoft.com/dotnet/aspnet:8.0'
           format: 'table'
-          exit-code: '0'
+          exit-code: '1'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
