@@ -102,6 +102,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: monitor
+          args: --file=./AzAppDevContainer.sln
 
   az-registry:
     name: Publish Artifact | Azure Container Registry
