@@ -40,17 +40,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: |
-            6.0.x
-            8.0.x
-      
-      - name: Dotnet Build
-        run: |
-          dotnet restore
-
       - name: Check Trivy DB sha
         id: trivy-db 
         env:
@@ -86,6 +75,17 @@ jobs:
 
       - name: Grant Trivy Permissions
         run: sudo chown -R $(stat . -c %u:%g) .trivy
+      
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: |
+            6.0.x
+            8.0.x
+      
+      - name: Dotnet Build
+        run: |
+          dotnet restore
 
       - name: Snyk Test
         uses: snyk/actions/dotnet@master
