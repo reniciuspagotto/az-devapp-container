@@ -68,17 +68,9 @@ jobs:
           path: .trivy
           key: trivy-db-${{ steps.trivy-db.outputs.sha }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build Image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: false
-          tags: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - name: Build an image from Dockerfile
+        run: |
+          docker build -t ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
       
       - name: Trivy Scanner | Dockerfile
         uses: aquasecurity/trivy-action@0.20.0
