@@ -40,9 +40,29 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Check Trivy DB sha
+        id: trivy-db 
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          endpoint='/orgs/aquasecurity/packages/container/trivy-db/versions'
+          headers='Accept: application/vnd.github+json'
+          jqFilter='.[] | select(.metadata.container.tags[] | contains("latest")) | .name | sub("sha256:";"")'
+          sha=$(gh api -H "${headers}" "${endpoint}" | jq --raw-output "${jqFilter}")
+          echo "Trivy DB sha256:${sha}"
+          echo "sha=${sha}" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        with:
+          path: .trivy
+          key: trivy-db-${{ steps.trivy-db.outputs.sha }}
+
       - name: Build an image from Dockerfile
         run: |
           docker build -t ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+
+      - name: Fix .trivy permissions
+        run: sudo chown -R $(stat . -c %u:%g) .trivy
       
       - name: Trivy Scanner | Dockerfile
         uses: aquasecurity/trivy-action@0.20.0
