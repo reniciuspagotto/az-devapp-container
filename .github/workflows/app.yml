@@ -44,14 +44,16 @@ jobs:
         run: |
           docker build -t ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
       
-      - name: Trivy Scanner | Repo
+      - name: Trivy Scanner | Dockerfile
         uses: aquasecurity/trivy-action@0.20.0
         with:
-          scan-type: 'rootfs'
-          scan-ref: 'rootfs-example-binary'
-          ignore-unfixed: true
+          image-ref: '${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}'
           format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+          scanners: vuln
 
       - name: Trivy Scanner | Docker Base Image
         uses: aquasecurity/trivy-action@0.20.0
