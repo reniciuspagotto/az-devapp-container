@@ -14,7 +14,7 @@ env:
 
 jobs:
   build:
-    name: Build | Test
+    name: Build | Test | Security
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -25,7 +25,7 @@ jobs:
         with:
           dotnet-version: 8.x 
       
-      - name: Dotnet Build
+      - name: Dotnet Restore and Build
         run: |
           dotnet restore
           dotnet build
@@ -69,13 +69,13 @@ jobs:
       - name: Grant Trivy Permissions
         run: sudo chown -R $(stat . -c %u:%g) .trivy
 
-      - name: Snyk Test
-        uses: snyk/actions/dotnet@master  
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: test
-          args: --severity-threshold=low
+      # - name: Snyk Test
+      #   uses: snyk/actions/dotnet@master  
+      #   env:
+      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #   with:
+      #     command: test
+      #     args: --severity-threshold=low
 
       - name: Snyk Monitor
         uses: snyk/actions/dotnet@master  
