@@ -51,12 +51,12 @@ jobs:
       - name: Trivy Scanner | Docker Image
         uses: aquasecurity/trivy-action@0.20.0
         with:
-          image-ref: 'mcr.microsoft.com/dotnet/aspnet:8.0'
+          image-ref: 'eclipse-temurin:17-jdk'
           format: 'table'
           exit-code: '0'
           ignore-unfixed: true
           vuln-type: 'os,library'
-          severity: 'HIGH,CRITICAL'
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
           scanners: vuln
 
   gh-package:
