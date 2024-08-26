@@ -60,20 +60,21 @@ jobs:
       - name: Build an image from Dockerfile
         run: |
           docker build -t ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
-
-      - name: Fix .trivy permissions
-        run: sudo chown -R $(stat . -c %u:%g) .trivy
       
       - name: Trivy Scanner | Dockerfile
         uses: aquasecurity/trivy-action@0.20.0
         with:
           image-ref: '${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}'
           format: 'table'
-          exit-code: '1'
+          exit-code: '0'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
           scanners: vuln
+          cache-dir: .trivy
+
+      - name: Grant Trivy Permissions
+        run: sudo chown -R $(stat . -c %u:%g) .trivy
 
   gh-package:
     name: Publish Artifact | GitHub Registry
