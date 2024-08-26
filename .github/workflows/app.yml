@@ -76,6 +76,19 @@ jobs:
       - name: Grant Trivy Permissions
         run: sudo chown -R $(stat . -c %u:%g) .trivy
 
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/dotnet@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor
+          args: --severity-threshold=high --sarif-file-output=snyk.sarif
+
+      - name: Upload Report to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: snyk.sarif
+
   az-registry:
     name: Publish Artifact | Azure Container Registry
     runs-on: ubuntu-latest
