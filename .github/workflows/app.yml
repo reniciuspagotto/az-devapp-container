@@ -32,13 +32,6 @@ jobs:
 
       - name: Dotnet Test
         run: dotnet test
-  
-  security:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
 
       - name: Check Trivy DB sha
         id: trivy-db 
@@ -75,6 +68,14 @@ jobs:
 
       - name: Grant Trivy Permissions
         run: sudo chown -R $(stat . -c %u:%g) .trivy
+
+      - name: Snyk Test
+        uses: snyk/actions/dotnet@master  
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: --severity-threshold=low
 
       - name: Snyk Monitor
         uses: snyk/actions/dotnet@master  
