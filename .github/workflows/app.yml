@@ -82,7 +82,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --severity-threshold=low,medium,high,critical
+          args: --severity-threshold=low
 
       - name: Snyk Monitor
         uses: snyk/actions/dotnet@master  
