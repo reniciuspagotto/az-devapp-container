@@ -48,10 +48,6 @@ jobs:
           format: 'table'
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
 
-      - name: Build Dockerfile
-        run: |
-          docker build -t ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.az-registry.outputs.version }} .
-
       - name: Trivy Scanner | Docker Image
         uses: aquasecurity/trivy-action@0.20.0
         with:
