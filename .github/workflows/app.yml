@@ -116,7 +116,7 @@ jobs:
   deploy:
     name: Azure Web App Deployment
     runs-on: ubuntu-latest
-    needs: [ gh-package, az-registry ]
+    needs: [ az-registry ]
     steps:
       - name: Login Azure
         env:
