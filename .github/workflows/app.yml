@@ -13,6 +13,8 @@ env:
   AZ_REGISTRY: "azdevrpf.azurecr.io"
 
 jobs:
+
+  # CI
   build:
     name: Build | Test
     runs-on: ubuntu-latest
@@ -111,6 +113,10 @@ jobs:
           command: monitor
           args: --file=./AzAppDevContainer.sln
 
+  # Sonar
+  # Regression tests
+  # Smoke Test
+
   az-registry:
     name: Publish Artifact to Azure Container Registry
     runs-on: ubuntu-latest
@@ -148,6 +154,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+ 
+  # CD
+
   deploy:
     name: Azure Web App Deployment
     runs-on: ubuntu-latest
@@ -167,3 +176,6 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           images: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.az-registry.outputs.version }}
+
+  # E2E Tests
+  # Performance Tests
