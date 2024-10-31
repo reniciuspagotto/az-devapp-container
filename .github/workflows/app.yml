@@ -9,12 +9,9 @@ on:
 env:
   AZURE_WEBAPP_NAME: azapprpc-appservice
   IMAGE_NAME: "azapp"
-  GH_REGISTRY: "ghcr.io"
   AZ_REGISTRY: "azdevrpf.azurecr.io"
 
 jobs:
-
-  # CI
   build:
     name: Build | Test
     runs-on: ubuntu-latest
@@ -78,7 +75,6 @@ jobs:
       - name: Grant Trivy Permissions
         run: sudo chown -R $(stat . -c %u:%g) .trivy
   
-  
   app-security:
     name: Security | Snyk Scanner
     runs-on: ubuntu-latest
@@ -112,10 +108,6 @@ jobs:
         with:
           command: monitor
           args: --file=./AzAppDevContainer.sln
-
-  # Sonar
-  # Regression tests
-  # Smoke Test
 
   az-registry:
     name: Publish Artifact to Azure Container Registry
@@ -154,9 +146,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
- 
-  # CD
-
   deploy:
     name: Azure Web App Deployment
     runs-on: ubuntu-latest
@@ -176,6 +165,3 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           images: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.az-registry.outputs.version }}
-
-  # E2E Tests
-  # Performance Tests

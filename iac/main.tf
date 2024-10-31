@@ -26,10 +26,6 @@ resource "azurerm_mssql_database" "main" {
   license_type = "LicenseIncluded"
   max_size_gb  = 1
   sku_name     = "Basic"
-
-  lifecycle {
-    prevent_destroy = false
-  }
 }
 
 resource "azurerm_container_registry" "main" {
@@ -37,7 +33,6 @@ resource "azurerm_container_registry" "main" {
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   sku                 = "Standard"
-  admin_enabled       = true
 }
 
 resource "azurerm_service_plan" "main" {
@@ -58,9 +53,6 @@ resource "azurerm_role_assignment" "main" {
   role_definition_name = "acrpull"
   scope                = azurerm_container_registry.main.id
   principal_id         = azurerm_user_assigned_identity.main.principal_id
-  depends_on = [
-    azurerm_user_assigned_identity.main
-  ]
 }
 
 resource "azurerm_linux_web_app" "main" {

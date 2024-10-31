@@ -52,10 +52,10 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -input=false -out azapp.tfplan
 
-      - uses: trstringer/manual-approval@v1
-        with:
-          secret: ${{ secrets.APPROVAL_TOKEN }}
-          approvers: reniciuspagotto
+      # - uses: trstringer/manual-approval@v1
+      #   with:
+      #     secret: ${{ secrets.APPROVAL_TOKEN }}
+      #     approvers: reniciuspagotto
 
       - name: Terraform Apply
         run: terraform apply -auto-approve azapp.tfplan
